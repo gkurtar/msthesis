@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MAIN", "MAIN\MAIN.csproj", "{73EBCF1B-5F39-4FDC-814C-EC38E916B2DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KINCAL", "MAIN\KINCAL.csproj", "{73EBCF1B-5F39-4FDC-814C-EC38E916B2DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE76DDE3-7340-4681-AA60-591510464BC8}
 	EndGlobalSection
 EndGlobal
