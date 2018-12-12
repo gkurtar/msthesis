@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace KinectCalibration.Properties
+namespace dene1.Properties
 {
 
 
@@ -44,7 +44,7 @@ namespace KinectCalibration.Properties
 			{
 				if ((resourceMan == null))
 				{
-					global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("KinectCalibration.Properties.Resources", typeof(Resources).Assembly);
+					global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("dene1.Properties.Resources", typeof(Resources).Assembly);
 					resourceMan = temp;
 				}
 				return resourceMan;
@@ -69,17 +69,6 @@ namespace KinectCalibration.Properties
 		}
 
 		/// <summary>
-		///   Looks up a localized string similar to Connect a device first!.
-		/// </summary>
-		internal static string ConnectDeviceFirst
-		{
-			get
-			{
-				return ResourceManager.GetString("ConnectDeviceFirst", resourceCulture);
-			}
-		}
-
-		/// <summary>
 		///   Looks up a localized string similar to No ready Kinect found!.
 		/// </summary>
 		internal static string NoKinectReady
@@ -89,44 +78,5 @@ namespace KinectCalibration.Properties
 				return ResourceManager.GetString("NoKinectReady", resourceCulture);
 			}
 		}
-
-		/// <summary>
-		///   Looks up a localized string similar to Failed to write screenshot to.
-		/// </summary>
-		internal static string ScreenshotWriteFailed
-		{
-			get
-			{
-				return ResourceManager.GetString("ScreenshotWriteFailed", resourceCulture);
-			}
-		}
-
-		/// <summary>
-		///   Looks up a localized string similar to Screenshot saved to.
-		/// </summary>
-		internal static string ScreenshotWriteSuccess
-		{
-			get
-			{
-				return ResourceManager.GetString("ScreenshotWriteSuccess", resourceCulture);
-			}
-		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	}
 }
