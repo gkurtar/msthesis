@@ -10,16 +10,30 @@ using System.Windows.Forms;
 
 namespace MAIN
 {
-	public partial class Form1 : Form
+	public partial class LiveKinectData : Form
 	{
-		public Form1()
+		public LiveKinectData()
 		{
 			InitializeComponent();
 		}
 
 		private void btnExit_Click(object sender, EventArgs e)
 		{
+			if (null != this.sensor) {
+				this.sensor.Stop();
+				this.sensor = null;
+			}
 			Application.Exit();
+		}
+
+		private void button1_Click(object sender, EventArgs e)
+		{
+			if (null != this.sensor)
+			{
+				this.sensor.Stop();
+				this.sensor = null;
+			}
+
 		}
 	}
 }

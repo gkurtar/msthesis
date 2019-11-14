@@ -59,5 +59,23 @@ namespace kincal.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to kinect is not ready.
+        /// </summary>
+        internal static string NoKinectReady {
+            get {
+                return ResourceManager.GetString("NoKinectReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to false.
+        /// </summary>
+        internal static string UseRGB {
+            get {
+                return ResourceManager.GetString("UseRGB", resourceCulture);
+            }
+        }
     }
 }

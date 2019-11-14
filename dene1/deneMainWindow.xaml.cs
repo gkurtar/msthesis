@@ -34,6 +34,8 @@ namespace dene1
 
 		/// Intermediate storage for the depth data received from the sensor
 		private DepthImagePixel[] depthPixels;
+		private DepthImagePixel[] rawDepthPixels;
+		private short[] depthNumericPixelValues;
 
 		/// Intermediate storage for the color data received from the camera
 		private byte[] colorPixels;
@@ -74,6 +76,10 @@ namespace dene1
 				this.sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
 				// Allocate space to put the depth pixels we'll receive
 				this.depthPixels = new DepthImagePixel[this.sensor.DepthStream.FramePixelDataLength];
+				this.rawDepthPixels = new DepthImagePixel[this.sensor.DepthStream.FramePixelDataLength];
+
+				this.depthNumericPixelValues = new short[this.sensor.DepthStream.FramePixelDataLength];
+
 				// Allocate space to put the color pixels we'll create
 				this.colorPixels = new byte[this.sensor.DepthStream.FramePixelDataLength * sizeof(int)];
 				// This is the bitmap we'll display on-screen
@@ -85,6 +91,8 @@ namespace dene1
 				this.MaskedColor.Source = this.colorBitmap;
 				// Add an event handler to be called whenever there is new depth frame data
 				this.sensor.DepthFrameReady += this.SensorDepthFrameReady;
+
+				
 				// Start the sensor!
 				try {
 					this.sensor.Start();
@@ -112,31 +120,64 @@ namespace dene1
 
 		void foo(Object sender, MouseEventArgs e) {
 			this.tbx_Pos.Text = String.Format("dene {0}, {1}",
-				Mouse.GetPosition(this).X,
-				Mouse.GetPosition(this).Y);
+				Mouse.GetPosition(this.MaskedColor).X,
+				Mouse.GetPosition(this.MaskedColor).Y);
 			
-			int X_Coord = (int) Mouse.GetPosition(this).X;
-			int Y_Coord = (int) Mouse.GetPosition(this).Y;
-			int nArrayPos = Y_Coord * this.sensor.DepthStream.FrameWidth + X_Coord;
+			int X_Coord = (int) Mouse.GetPosition(this.MaskedColor).X;
+			int Y_Coord = (int) Mouse.GetPosition(this.MaskedColor).Y;
 
-			if (this.depthPixels.Length > nArrayPos) {
-				this.tbx_Depth.Text = String.Format("fw {0}, idx {1}," +
-					" arysz {2}, isKnown {3} val {4}",
-				this.sensor.DepthStream.FrameWidth,
-				nArrayPos,
-				this.depthPixels.Length,
-				this.depthPixels[nArrayPos].IsKnownDepth,
-				this.depthPixels[nArrayPos].Depth);
+			if (sensor != null) {
+				int nArrayPos = Y_Coord * this.sensor.DepthStream.FrameWidth + X_Coord;
+
+				if (this.depthPixels.Length > nArrayPos)
+				{
+					short sTemp = this.depthNumericPixelValues[nArrayPos];
+					int nTemp = sTemp & 0x0000FFFF;
+					nTemp >>= DepthImageFrame.PlayerIndexBitmaskWidth;
+					//DepthImageFrame.PlayerIndexBitmask
+					int first11 = (int) sTemp & 0x000007FF;
+					int first12 = (int) sTemp & 0x00000FFF;
+					int signbit = first12 >> 11;
+
+					int nDepthValueFromRawData = sTemp >> DepthImageFrame.PlayerIndexBitmaskWidth;
+
+					this.tbx_Depth.Text = String.Format("idx {0}," +
+						" isKnown {1} val {2}, raw {3}, pix {4}, msb {5}," +
+						//" twel {6}, elev {7}, lethtn {8}, depthFromRaw{9} ",
+						" twel {6}, elev {7}, depthFromRaw{8} ",
+					nArrayPos,
+					this.depthPixels[nArrayPos].IsKnownDepth,
+					this.depthPixels[nArrayPos].Depth,
+					this.rawDepthPixels[nArrayPos].Depth,
+					this.depthNumericPixelValues[nArrayPos],
+					signbit,
+					first12,
+					first11,
+					//nTemp,
+					nDepthValueFromRawData
+					);
+				}
+				else {
+					this.tbx_Depth.Text = String.Format("dene {0}, {1}",
+					Mouse.GetPosition(this.MaskedColor).X,
+					Mouse.GetPosition(this.MaskedColor).Y);
+				}
+
+				this.tbxTemp.Text = String.Format("fw {0}, dp_len {1}, dpval_len {2}",
+					this.sensor.DepthStream.FrameWidth,
+					this.depthPixels.Length,
+					this.depthNumericPixelValues.Length);
 			}
 			else {
 				this.tbx_Depth.Text = String.Format("dene {0}, {1}",
-				Mouse.GetPosition(this).X,
-				Mouse.GetPosition(this).Y);
+				Mouse.GetPosition(this.MaskedColor).X,
+				Mouse.GetPosition(this.MaskedColor).Y);
 			}
-			//this.depthPixels[]
 
+			//this.depthPixels[]
 			return;
 		}
+
 
 		/// <summary>
 		/// Event handler for Kinect sensor's DepthFrameReady event
@@ -145,11 +186,20 @@ namespace dene1
 		/// <param name="e">event arguments</param>
 		private void SensorDepthFrameReady(object sender, DepthImageFrameReadyEventArgs e)
 		{
+			//this.tbxTemp.Text = kk++.ToString();
 			using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
 			{
 				if (depthFrame != null) {
 					// Copy the pixel data from the image to a temporary array
 					depthFrame.CopyDepthImagePixelDataTo(this.depthPixels);
+
+					this.rawDepthPixels = depthFrame.GetRawPixelData();
+
+					depthFrame.CopyPixelDataTo(this.depthNumericPixelValues);
+
+					
+					
+					
 
 					// Get the min and max reliable depth for the current frame
 					int minDepth = depthFrame.MinDepth;
@@ -171,16 +221,12 @@ namespace dene1
 						// See the KinectDepthViewer class used by the KinectExplorer sample
 						// for a lookup table example.
 						byte intensity = (byte)(depth >= minDepth && depth <= maxDepth ? depth : 0);
-
 						// Write out blue byte
 						this.colorPixels[colorPixelIndex++] = intensity;
-
 						// Write out green byte
 						this.colorPixels[colorPixelIndex++] = intensity;
-
 						// Write out red byte                        
 						this.colorPixels[colorPixelIndex++] = intensity;
-
 						// We're outputting BGR, the last byte in the 32 bits is unused so skip it
 						// If we were outputting BGRA, we would write alpha here.
 						++colorPixelIndex;
@@ -194,8 +240,8 @@ namespace dene1
 						0);
 				}
 			}
+			return;
 		}
-
 
 		/*
 		private void MaskedColor_MouseOver(object sender, MouseEventArgs e)
