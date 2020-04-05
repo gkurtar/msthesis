@@ -64,9 +64,13 @@ namespace KinectCalibration
 		//private DepthImagePixel[] rawDepthPixels;
 		//private short[] depthNumericPixelValues;
 
+		private System.Threading.Timer snapshotTimer;
+
 		private void WindowLoaded(object sender, RoutedEventArgs e) {
 			//System.Configuration.AppSettingsReader.
 			String strCamType = ConfigurationManager.AppSettings["CAMERA_TYPE"];
+
+			
 
 			MessageBox.Show("CAMERA MODE: " + strCamType);
 
@@ -151,9 +155,14 @@ namespace KinectCalibration
 
 				// Add an event handler to be called whenever there is new depth frame data
 				this.sensor.AllFramesReady += this.SensorAllFramesReady;
+				//this.sensor.ElevationAngle = 0;
 				// Start the sensor!
 				try {
 					this.sensor.Start();
+
+					snapshotTimer = new System.Threading.Timer(
+						new System.Threading.TimerCallback(TimerTask), null, 5000, 15000);
+
 				} catch (IOException) {
 					this.sensor = null;
 				}
@@ -343,6 +352,7 @@ namespace KinectCalibration
 			string path = System.IO.Path.Combine(myPhotos,
 				(USE_RGB_CAMERA ? "KinectRgbSnapshot-" : "KinectIrSnapshot-") + time + ".png");
 			
+
 			// write the new file to disk
 			try {
 				using (FileStream fs = new FileStream(path, FileMode.Create)) {
@@ -350,6 +360,7 @@ namespace KinectCalibration
 				}
 				this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture,
 					"{0} Saved image to {1}", Properties.Resources.ScreenshotWriteSuccess, path);
+				//MessageBox.Show("Saved " + path);
 			} catch (IOException) {
 				this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture,
 					"{0} {1}", Properties.Resources.ScreenshotWriteFailed, path);
@@ -519,12 +530,26 @@ namespace KinectCalibration
 			return;
 		}
 
-		/*
+		private void TimerTask(object state)
+		{
+			Application.Current.Dispatcher.Invoke(
+				System.Windows.Threading.DispatcherPriority.Normal, new Action(() =>
+			{
+				this.btnSaveRGBIR_Click(null, null);
+				string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+				string fileType = USE_RGB_CAMERA ? "KinectRgbSnapshot" : "KinectIrSnapshot";
+				MessageBox.Show("Saved " + fileType + " in " + myPhotos);
+			}));
+			//MessageBox.Show("5 saniye geçti!..");
+		}
+
+		//TODO handle later
 		private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-			this.sensor.ElevationAngle = (int) sldTiltAngle.Value;
-			this.statusBarText.Text = string.Format("Val:  {0}", sldTiltAngle.Value);
+			//this.sensor.ElevationAngle = (int) sldTiltAngle.Value;
+			//this.statusBarText.Text = string.Format("Val:  {0}", sldTiltAngle.Value);
+
 			return;
 		}
-		*/
+		
 	}
 }
